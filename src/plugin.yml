@@ -1,8 +1,18 @@
 main: md.takkapi.mapImages.CustomMaps
-author: Takkapi
-version: 1.0
+authors: [Takkapi, BC5]
+version: 1.1
 name: MapImages
-api-version: 1.16
+description: "Allows the loading of images onto maps"
+api-version: 1.18
 
 commands:
-  map:
+  getmap:
+    description: "Load an image from a URL onto a map"
+    usage: "/getmap <url>"
+    permission: "mapimages.getmap"
+
+permissions:
+  mapimages.getmap:
+    default: true
+  mapimages.getmap.thinair:
+    default: false

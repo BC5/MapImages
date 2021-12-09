@@ -10,7 +10,7 @@ public class CustomMaps extends JavaPlugin {
     public void onEnable() {
         ImageManager manager = ImageManager.getInstance();
         manager.init();
-        this.getCommand("map").setExecutor(new ImageCommand());
+        this.getCommand("getmap").setExecutor(new ImageCommand());
     }
 
     @Override

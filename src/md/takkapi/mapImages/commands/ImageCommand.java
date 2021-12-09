@@ -19,15 +19,41 @@ public class ImageCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
         //MapView <--- map meta MapView -> ItemStack.MAP
         if(!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.DARK_RED + "This is an only player command!");
+            sender.sendMessage(ChatColor.DARK_RED + "This command may only be executed by players");
             return true;
         }
 
         Player player = (Player) sender;
 
         if(args.length == 0){
-            player.sendMessage(ChatColor.DARK_RED + "Invalid usage, /link <Image_URL>");
+            player.sendMessage(ChatColor.DARK_RED + "Invalid usage, /getmap <url>");
             return true;
+        }
+
+        boolean spawnNewMap = false;
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+
+        //Deny map creation if player is not holding a map and doesn't have relevant permission
+        if(mainHand.getType() != Material.MAP)
+        {
+            if(!player.hasPermission("mapimages.getmap.thinair"))
+            {
+                player.sendMessage(ChatColor.DARK_RED + "You must be holding a map");
+                return true;
+            }
+            else
+            {
+                spawnNewMap = true;
+            }
+        }
+        else
+        {
+            //Otherwise multiple stacked empty maps would be overwritten to 1 filled map
+            if(mainHand.getAmount() > 1)
+            {
+                player.sendMessage(ChatColor.DARK_RED + "You must be holding exactly one map");
+                return true;
+            }
         }
 
         MapView view = Bukkit.createMap(player.getWorld());
@@ -35,7 +61,7 @@ public class ImageCommand implements CommandExecutor {
 
         LogoRenderer renderer = new LogoRenderer();
         if (!renderer.load(args[0])) {
-            player.sendMessage(ChatColor.DARK_RED + "Could not load image. Please make sure that the url is correct!");
+            player.sendMessage(ChatColor.DARK_RED + "Image load failure. Check URL validity.");
             return true;
         }
         view.addRenderer(renderer);
@@ -46,8 +72,10 @@ public class ImageCommand implements CommandExecutor {
         meta.setMapView(view); // new way
         map.setItemMeta(meta);
 
-        player.getInventory().addItem(map);
-        player.sendMessage(ChatColor.GREEN + "Map has been created");
+        if(spawnNewMap) player.getInventory().addItem(map);
+        else player.getInventory().setItemInMainHand(map);
+
+        player.sendMessage(ChatColor.GREEN + "Map successfully created");
 
         ImageManager manager = ImageManager.getInstance();
         manager.saveImage(view.getId(), args[0]);
